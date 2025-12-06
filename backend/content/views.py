@@ -1,6 +1,5 @@
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny, DjangoModelPermissions
 from rest_framework.viewsets import ModelViewSet
 from .models import Content
 from .permissions import ContentPermission
@@ -20,3 +19,17 @@ class ContentViewSet(ModelViewSet):
     ordering_fields = ['created_at']
     ordering = ['-created_at']
     pagination_class = ContentPagination
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        my_content = self.request.query_params.get('my_content')
+
+        if my_content == 'true' and self.request.user.is_authenticated:
+            queryset = queryset.filter(author=self.request.user)
+
+        return queryset
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
