@@ -15,7 +15,7 @@ class ContentPermission(BasePermission):
         if request.method in SAFE_METHODS:
             return True
 
-        if request.user.is_staff:
+        if request.user.groups.filter(name="author").exists():
             return obj.author == request.user
 
         return False

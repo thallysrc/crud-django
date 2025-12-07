@@ -1,7 +1,10 @@
+from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from .models import Content
+from .models import Content, Favorite
 from .permissions import ContentPermission
 from .serializers import ContentSerializer
 
@@ -32,4 +35,3 @@ class ContentViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
-
