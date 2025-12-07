@@ -59,8 +59,7 @@ onMounted(() => {
 
 const getAuthHeader = () => {
   if (!auth) return {}
-  if (auth.token) return { Authorization: `Bearer ${auth.token}` }
-  if (auth.user && auth.user.token) return { Authorization: `Bearer ${auth.user.token}` }
+  if (auth.token) return { Authorization: `Token ${auth.token}` }
   return {}
 }
 
@@ -96,7 +95,7 @@ const createPost = async () => {
 
     success.value = true
     setTimeout(() => {
-      router.push('/favoritos')
+      router.push('/')
     }, 700)
   } catch (err) {
     error.value = err.message || String(err)

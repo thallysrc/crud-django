@@ -5,26 +5,33 @@ const LOGIN_URL = 'http://127.0.0.1:8000/login/'
 const ME_URL = 'http://127.0.0.1:8000/accounts/me/'
 
 export const useAuth = defineStore('auth', () => {
-  const user = ref<null | any>(null)
+  const user = ref<any | null>(null)
   const token = ref<string | null>(null)
-  const permissions = ref<string[]>([])
+  const isInitialized = ref(false)
 
-  try {
-    const savedToken = localStorage.getItem('auth_token')
-    const savedUser = localStorage.getItem('auth_user')
-    const savedPerms = localStorage.getItem('auth_permissions')
-    if (savedToken) token.value = savedToken
-    if (savedUser) user.value = JSON.parse(savedUser)
-    if (savedPerms) permissions.value = JSON.parse(savedPerms)
-  } catch {
+  const saveToStorage = () => {
+    if (process.server) return
+    try {
+      if (token.value) localStorage.setItem('auth_token', token.value)
+      if (user.value) localStorage.setItem('auth_user', JSON.stringify(user.value))
+    } catch {}
   }
 
+  const loadFromStorage = () => {
+    if (process.server) return
+    try {
+      const savedToken = localStorage.getItem('auth_token')
+      const savedUser = localStorage.getItem('auth_user')
 
-  const getAuthHeader = () => {
-    if (!token.value) return {}
-    return { Authorization: `Token ${token.value}` }
+      if (savedToken) token.value = savedToken
+      if (savedUser) user.value = JSON.parse(savedUser)
+    } finally {
+      isInitialized.value = true
+    }
   }
 
+  const getAuthHeader = () =>
+    token.value ? { Authorization: `Token ${token.value}` } : {}
 
   const login = async (username: string, password: string) => {
     try {
@@ -34,79 +41,47 @@ export const useAuth = defineStore('auth', () => {
         body: JSON.stringify({ username, password })
       })
 
-      if (!res.ok) {
-        const text = await res.text().catch(() => null)
-        console.error('Login failed:', res.status, text)
-        return false
+      if (!res.ok) return false
+
+      const data = await res.json().catch(() => null)
+      if (!data?.token) return false
+
+      token.value = data.token
+
+      const meRes = await fetch(ME_URL, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json', ...getAuthHeader() }
+      })
+
+      if (meRes.ok) {
+        user.value = await meRes.json().catch(() => null)
       }
 
-      const data = await res.json().catch(() => null) ?? {}
-
-  
-      if (data.token) {
-        token.value = data.token
-        try {
-          localStorage.setItem('auth_token', token.value)
-        } catch {
-        }
-      } else {
-        console.error('Login response did not include token', data)
-        return false
-      }
-
-      try {
-        const meRes = await fetch(ME_URL, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            ...getAuthHeader()
-          }
-        })
-
-        if (meRes.ok) {
-          const meData = await meRes.json().catch(() => null) ?? {}
-          user.value = meData
-
-          permissions.value = Array.isArray(meData.permissions) ? meData.permissions : []
-          try {
-            localStorage.setItem('auth_permissions', JSON.stringify(permissions.value))
-          } catch {
-          }
-        } else {
-
-          console.warn('Could not fetch /accounts/me/:', meRes.status)
-          user.value = { username }
-          permissions.value = []
-        }
-      } catch (err) {
-        console.warn('Error fetching /accounts/me/:', err)
-        user.value = { username }
-        permissions.value = []
-      }
-
-      try {
-        localStorage.setItem('auth_user', JSON.stringify(user.value))
-      } catch {
-      }
-
+      saveToStorage()
       return true
-    } catch (err) {
-      console.error('Login error', err)
+    } catch {
       return false
     }
   }
 
   const logout = () => {
-    user.value = null
-    token.value = null
-    permissions.value = []
-    try {
+    if (!process.server) {
       localStorage.removeItem('auth_token')
       localStorage.removeItem('auth_user')
-      localStorage.removeItem('auth_permissions')
-    } catch {
     }
+    user.value = null
+    token.value = null
   }
 
-  return { user, token, permissions, login, logout, getAuthHeader }
+  if (process.client) loadFromStorage()
+
+  return {
+    user,
+    token,
+    isInitialized,
+    login,
+    logout,
+    getAuthHeader,
+    loadFromStorage
+  }
 })
