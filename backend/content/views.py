@@ -1,8 +1,11 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from .models import Content, Favorite
 from .permissions import ContentPermission
@@ -35,3 +38,39 @@ class ContentViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+
+
+class FavoriteContentViewSet(ModelViewSet):
+    serializer_class = ContentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Content.objects.filter(favorited_by_relation__user=self.request.user).distinct()
+
+    @action(detail=False, methods=['post'], url_path='favorite')
+    def favorite(self, request):
+        content_id = request.data.get("content_id")
+        if not content_id:
+            return Response({"error": "content_id is required"}, status=400)
+
+        content = get_object_or_404(Content, pk=content_id)
+        favorite, created = Favorite.objects.get_or_create(user=request.user, content=content)
+
+        if created:
+            return Response({"message": "Content favorited"}, status=201)
+        return Response({"message": "Content already favorited"}, status=200)
+
+    @action(detail=False, methods=['post'], url_path='unfavorite')
+    def unfavorite(self, request):
+        content_id = request.data.get("content_id")
+        if not content_id:
+            return Response({"error": "content_id is required"}, status=400)
+
+        content = get_object_or_404(Content, pk=content_id)
+        favorite = Favorite.objects.filter(user=request.user, content=content)
+
+        if favorite.exists():
+            favorite.delete()
+            return Response({"message": "Content unfavorited"}, status=200)
+        return Response({"message": "Content was not favorited"}, status=400)

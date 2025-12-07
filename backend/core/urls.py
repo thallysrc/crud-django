@@ -19,10 +19,11 @@ from django.urls import path, include
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.routers import DefaultRouter
 
-from content.views import ContentViewSet
+from content.views import ContentViewSet, FavoriteContentViewSet
 
 router = DefaultRouter()
 router.register(r"contents", ContentViewSet)
+router.register(r"favorites", FavoriteContentViewSet, basename='favorites')
 
 urlpatterns = [
     path('login/', obtain_auth_token, name='api_token_auth'),

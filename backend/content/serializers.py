@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Content
+from .models import Content, Favorite
 
 
 class ContentSerializer(serializers.ModelSerializer):

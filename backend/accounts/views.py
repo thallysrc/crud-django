@@ -29,6 +29,7 @@ class UserPermissionView(APIView):
         all_permissions = sorted(set(permissions + group_permissions))
 
         data = {
+            "id": user.id,
             "username": user.username,
             "groups": groups,
             "permissions": all_permissions,
