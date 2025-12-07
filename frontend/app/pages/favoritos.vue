@@ -26,29 +26,60 @@
         </div>
 
         <div class="post-content">{{ post.description }}</div>
+
+        <!-- Unfavorite button (visible only to logged users) -->
+        <div class="mt-2">
+          <button
+            v-if="isLoggedIn"
+            class="btn btn-sm btn-outline-danger"
+            :disabled="unfavoritingIds.includes(post.id)"
+            @click="unfavoritePost(post.id)"
+          >
+            <span v-if="unfavoritingIds.includes(post.id)">Removing...</span>
+            <span v-else>Remove favorite</span>
+          </button>
+        </div>
       </div>
     </div>
   </main>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import Navbar from '~/components/Navbar.vue'
+import { useAuth } from '~/stores/auth'
 
 const posts = ref([])
 const loading = ref(true)
 const error = ref(null)
 
-const API_URL = 'http://127.0.0.1:8000/contents/'
+const FAVORITES_URL = 'http://127.0.0.1:8000/favorites/'
+const FAVORITES_UNFAVORITE_URL = 'http://127.0.0.1:8000/favorites/unfavorite/'
+const auth = useAuth()
+
+const unfavoritingIds = ref([]) // track in-progress removals
 
 const fetchPosts = async () => {
   loading.value = true
   error.value = null
   try {
-    const res = await fetch(API_URL)
+    // require login for favorites
+    if (!auth?.token) {
+      error.value = 'You must be logged in to view favorites.'
+      posts.value = []
+      loading.value = false
+      return
+    }
+    const res = await fetch(FAVORITES_URL, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(typeof auth.getAuthHeader === 'function' ? auth.getAuthHeader() : {})
+      }
+    })
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`)
     const data = await res.json()
-    posts.value = data.results ?? []
+    // API may return paginated results or a plain array
+    posts.value = Array.isArray(data) ? data : (data.results ?? [])
   } catch (err) {
     error.value = err.message || String(err)
   } finally {
@@ -64,6 +95,38 @@ const formatDate = (iso) => {
     return new Date(iso).toLocaleString()
   } catch {
     return iso
+  }
+}
+
+const isLoggedIn = computed(() => !!auth.token)
+
+const unfavoritePost = async (contentId) => {
+  if (!isLoggedIn.value) {
+    alert('You must be logged in to remove favorites.')
+    return
+  }
+  if (unfavoritingIds.value.includes(contentId)) return
+
+  unfavoritingIds.value.push(contentId)
+  try {
+    const res = await fetch(FAVORITES_UNFAVORITE_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(typeof auth.getAuthHeader === 'function' ? auth.getAuthHeader() : {})
+      },
+      body: JSON.stringify({ content_id: contentId })
+    })
+    if (!res.ok) {
+      const txt = await res.text().catch(() => null)
+      throw new Error(txt || `${res.status} ${res.statusText}`)
+    }
+    // remove from local list on success
+    posts.value = posts.value.filter(p => p.id !== contentId)
+  } catch (err) {
+    alert('Failed to remove favorite: ' + (err?.message || String(err)))
+  } finally {
+    unfavoritingIds.value = unfavoritingIds.value.filter(id => id !== contentId)
   }
 }
 </script>
