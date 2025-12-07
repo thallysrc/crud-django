@@ -1,0 +1,223 @@
+/* * 1. Global Reset: Apply to all elements (*)
+ * This ensures consistent box-sizing and removes default margins/paddings.
+ */
+* {
+    /* The most important Bootstrap-like reset:
+       Border and padding are included in the element's total width and height. */
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+body {
+  font-family: 'Roboto', sans-serif;
+}
+
+/* * 2. Container Class: Limits content width and centers it
+ */
+.container {
+    width: 100%;
+    max-width: 1200px; /* Example max width, adjust as needed */
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 15px; /* Padding for mobile/small screens */
+    padding-right: 15px;
+}
+
+/* * 3. Row Class: Sets up the Flexbox context for columns
+ */
+.row {
+    display: flex;
+    flex-wrap: wrap; /* Allows columns to wrap to the next line */
+    /* Negative margin to counteract the column's padding-left/right */
+    margin-left: -15px;
+    margin-right: -15px;
+}
+
+/* * 4. Column Styles (Simplified 4-column system for example)
+ * The columns use padding to create spacing (gutters).
+ */
+[class*="col-"] {
+    /* Padding to create the gutter spacing */
+    padding-left: 15px;
+    padding-right: 15px;
+    /* This ensures columns don't shrink below their content size unless explicitly told to */
+    flex-grow: 0;
+    flex-shrink: 0;
+}
+
+/* Define widths for a 4-column grid: 12 / 3 = 4 columns at 25% each */
+.col-4 {
+    width: 33.3333%;
+}
+
+.col-6 {
+    width: 50%;
+}
+
+.col-12 {
+    width: 100%;
+}
+
+.offset-4 {
+    margin-left: 33.3333%;
+}
+
+/* ====== Navbar custom styles ====== */
+.app-navbar {
+  /* garante que a navbar use nossas regras (remove classes utilitárias conflitantes) */
+  display: block;
+  background: linear-gradient(135deg, #2b5876 0%, #4e4376 100%);
+  color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  padding: 0; /* padding aplicado no inner wrapper */
+}
+
+/* inner container: centra e limita largura */
+.app-navbar .nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 20px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* brand */
+.app-navbar .brand a {
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.05rem;
+  text-decoration: none;
+  display: inline-block;
+}
+
+/* link group */
+.app-navbar .nav-links {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex: 1;
+  justify-content: center; /* mantém links centralizados entre brand e auth */
+}
+
+/* individual nav links */
+.app-navbar .nav-link {
+  color: rgba(255,255,255,0.95);
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background-color 180ms ease, transform 150ms ease;
+  font-size: 0.98rem;
+  display: inline-block;
+}
+
+.app-navbar .nav-link:hover {
+  background: rgba(255,255,255,0.06);
+  transform: translateY(-1px);
+}
+
+/* auth buttons / links */
+.app-navbar .auth-btn,
+.app-navbar .auth-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease;
+  font-size: 0.95rem;
+}
+
+.app-navbar .auth-btn:hover,
+.app-navbar .auth-link:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.14);
+}
+
+/* small screens: empilha e reduz espaçamento */
+@media (max-width: 768px) {
+  .app-navbar .nav-inner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .app-navbar .nav-links {
+    justify-content: space-between;
+  }
+
+  .app-navbar .nav-link {
+    flex: 1;
+    text-align: center;
+  }
+
+  .app-navbar .auth-area {
+    display: flex;
+    justify-content: center;
+  }
+}
+
+/* ====== Posts styles ====== */
+.posts-container {
+  max-width: 900px;
+  margin: 1.5rem auto;
+  padding: 0 16px;
+}
+
+.post-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.03));
+  color: #333;
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.18);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.post-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+}
+
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.post-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+
+.post-content {
+  color: #333;
+  line-height: 1.5;
+  font-size: 1rem;
+  margin-top: 6px;
+}
+
+/* mobile adjustments */
+@media (max-width: 600px) {
+  .post-card {
+    padding: 12px;
+  }
+
+  .post-title {
+    font-size: 1rem;
+  }
+}
