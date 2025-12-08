@@ -1,9 +1,16 @@
-
 services:
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
     command: sh -c "poetry run python manage.py migrate && poetry run python manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./backend:/app
@@ -12,6 +19,8 @@ services:
     depends_on:
       - postgres
     environment:
+      PYTHONUNBUFFERED: 1
+      DJANGO_SETTINGS_MODULE: core.settings
       DATABASE_URL: postgres://gandalf:ring@db:5432/postgres
 
   postgres:
