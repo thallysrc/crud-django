@@ -28,7 +28,7 @@
 
             <div class="post-content">{{ post.description }}</div>
 
-            <!-- Unfavorite button (visible only to logged users) -->
+
             <div class="mt-2">
               <button
                 v-if="isLoggedIn"
@@ -36,8 +36,8 @@
                 :disabled="unfavoritingIds.includes(post.id)"
                 @click="unfavoritePost(post.id)"
               >
-                <span v-if="unfavoritingIds.includes(post.id)">Removing...</span>
-                <span v-else>Remove favorite</span>
+                <span v-if="unfavoritingIds.includes(post.id)">Removendo...</span>
+                <span v-else>Remover favorito</span>
               </button>
             </div>
           </div>
