@@ -22,3 +22,7 @@ autor
 leitor
 123
 ```
+
+### Como testar
+
+O frontend vai estar rodando em localhost:3000
