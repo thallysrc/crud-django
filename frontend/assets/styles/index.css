@@ -1,0 +1,94 @@
+/* Page container */
+.container {
+  max-width: 900px;
+  margin: 28px auto;
+  padding: 0 16px;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  color: #222;
+}
+
+/* Toolbar */
+.mb-3.d-flex {
+  gap: 12px;
+  align-items: flex-start;
+}
+.toolbar .form-control-lg,
+input.form-control {
+  border-radius: 8px;
+  box-shadow: none;
+  border: 1px solid #e3e6ea;
+  transition: box-shadow .12s ease, border-color .12s ease;
+}
+input.form-control:focus {
+  outline: none;
+  box-shadow: 0 6px 20px rgba(14, 30, 37, 0.06);
+  border-color: #4f8cff;
+}
+
+/* Buttons in toolbar */
+.d-flex .btn {
+  min-width: 52px;
+  height: 36px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+.d-flex .btn i { margin-right: 6px; }
+
+/* Post card */
+.post-card, .card {
+  background: #ffffff;
+  border-radius: 10px;
+  margin-bottom: 14px;
+  box-shadow: 0 6px 18px rgba(14, 30, 37, 0.06);
+  overflow: hidden;
+  border: 1px solid rgba(16,24,40,0.04);
+}
+.card-body, .post-card {
+  padding: 16px;
+}
+.card-title, .post-title {
+  font-weight: 600;
+  font-size: 1.05rem;
+  margin-bottom: 6px;
+  color: #111827;
+}
+.post-meta, .text-muted.small {
+  color: #6b7280;
+  font-size: 0.82rem;
+}
+
+/* Description */
+.card-text, .post-content {
+  color: #374151;
+  line-height: 1.5;
+  margin-top: 8px;
+}
+
+/* Action buttons */
+.btn-group .btn,
+.post-card .btn {
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.88rem;
+}
+.btn-outline-warning { color: #b45309; border-color: rgba(180,83,9,0.12); }
+.btn-outline-warning:hover { background: rgba(180,83,9,0.06); }
+
+.btn-outline-primary { color: #0b5fff; border-color: rgba(11,95,255,0.12); }
+.btn-outline-primary:hover { background: rgba(11,95,255,0.06); }
+
+.btn-outline-danger { color: #c92a2a; border-color: rgba(201,42,42,0.08); }
+.btn-outline-danger:hover { background: rgba(201,42,42,0.04); }
+
+/* Icons */
+.fa-solid { font-size: 0.95rem; vertical-align: middle; }
+
+/* Responsive */
+@media (max-width: 576px) {
+  .container { padding: 0 12px; }
+  .d-flex .btn { min-width: 44px; height: 34px; font-size: 0.82rem; }
+  input.form-control { font-size: 0.95rem; }
+}
+
+/* Small utilities */
+.text-end { text-align: right; }

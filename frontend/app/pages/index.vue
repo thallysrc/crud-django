@@ -3,19 +3,38 @@
 
   <div class="container">
     <div class="row">
-      <div class="col-4 offset-4">
-        <div class="mb-3">
+      <div class="col-6 offset-3">
+        <div class="toolbar">
           <input
             v-model="searchTerm"
-            class="form-control"
+            class="toolbar__search"
             type="search"
-            placeholder="Search title or description..."
+            placeholder="Pesquise por Titulo ou Descrição"
             aria-label="Search posts"
           />
-          <div class="mt-2">
-            <button v-if="searchTerm" @click="clearSearch" class="btn btn-sm btn-outline-secondary">Clear</button>
+
+          <div class="toolbar__actions">
+            <button v-if="searchTerm" @click="clearSearch" class="btn btn--clear">Clear</button>
+             <button v-if="isLoggedIn"
+                    @click="toggleMyContent"
+                    class="btn btn--my"
+                    :class="{ 'btn--active': myContent }"
+            >
+              {{ myContent ? 'Meus conteúdos: ON' : 'Meus conteúdos: OFF' }}
+            </button>
+
+            <button @click="toggleOrdering"
+                    class="btn btn--order"
+                    :class="{ 'btn--active': ordering !== '-created_at' }"
+            >
+              {{ ordering === '-created_at' ? 'Data: Mais recentes' : 'Data: Mais antigos' }}
+            </button>
+
+           
           </div>
         </div>
+
+
 
         <div v-if="loading">Carregando posts...</div>
         <div v-else-if="error">Erro: {{ error }}</div>
@@ -26,33 +45,21 @@
               <h2 class="post-title">{{ post.title }}</h2>
               <div class="post-meta">{{ formatDate(post.created_at) }}</div>
               <p class="post-content">{{ post.description }}</p>
-              <i class="fa-solid fa-user"></i>
 
-              <div class="mt-2 d-flex gap-2" >
+              <div class="post-actions">
                 <button
                   v-if="isLoggedIn"
-                  class="btn btn-sm btn-outline-warning"
+                  class="btn btn-fav"
                   :disabled="favoritingIds.includes(post.id) || favorited.includes(post.id)"
                   @click="favoritePost(post.id)"
-                  :title="favorited.includes(post.id) ? 'Favorited' : 'Favorite'"
                 >
-                  <span v-if="favorited.includes(post.id)">★ Favorited</span>
-                  <span v-else-if="favoritingIds.includes(post.id)">...Favoriting</span>
-                  <span v-else>☆ Favorite</span>
+                  <span v-if="favorited.includes(post.id)">★ Favoritado</span>
+                  <span v-else-if="favoritingIds.includes(post.id)">...Favoritando</span>
+                  <span v-else>☆ Favoritar</span>
                 </button>
 
-                <div>
-                  <button
-                    v-if="canDelete(post.author)"
-                    class="btn btn-sm btn-danger"
-                    @click="confirmDelete(post.id)"
-                  >Exclude</button>
-                  <button
-                    v-if="canEdit(post.author)"
-                    class="btn btn-sm btn-primary"
-                    @click="editPost(post.id)"
-                  >Edit</button>
-                </div>
+                <button v-if="canDelete(post.author)" class="btn btn-del" @click="confirmDelete(post.id)">Deletar</button>
+                <button v-if="canEdit(post.author)" class="btn btn-edit" @click="editPost(post.id)">Editar</button>
               </div>
             </div>
           </div>
@@ -63,6 +70,7 @@
 </template>
 
 <script setup>
+
 import Navbar from '~/components/Navbar.vue'
 import { useAuth } from '~/stores/auth'
 import { ref, onMounted, watch, computed } from 'vue'
@@ -75,50 +83,68 @@ const error = ref(null)
 
 const API_URL = 'http://127.0.0.1:8000/'
 
-const fetchPosts = async (search = '') => {
-  loading.value = true
-  error.value = null
-  try {
-    const q = search ? `?search=${encodeURIComponent(search)}` : ''
-    const res = await fetch(`${API_URL}contents/${q}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...(typeof auth.getAuthHeader === 'function' ? auth.getAuthHeader() : {})
-      }
-    })
-    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`)
-    const data = await res.json()
 
-    posts.value = Array.isArray(data) ? data : (data.results ?? [])
-  } catch (err) {
-    error.value = err?.message || String(err)
-    posts.value = []
-  } finally {
-    loading.value = false
-  }
+const ordering = ref('-created_at')
+
+const myContent = ref(false)
+
+const toggleMyContent = () => {
+  myContent.value = !myContent.value
+  fetchPosts(searchTerm.value.trim(), ordering.value, myContent.value)
 }
 
-onMounted(() => fetchPosts())
+const toggleOrdering = () => {
+  ordering.value = ordering.value === '-created_at' ? 'created_at' : '-created_at'
+  fetchPosts(searchTerm.value.trim(), ordering.value, myContent.value)
+}
+
+const fetchPosts = async (search = '', orderingParam = ordering.value, myContentParam = myContent.value) => {
+    loading.value = true
+    error.value = null
+    try {
+    const parts = []
+    if (search) parts.push(`search=${encodeURIComponent(search)}`)
+    if (orderingParam) parts.push(`ordering=${encodeURIComponent(orderingParam)}`)
+    if (myContentParam) parts.push(`my_content=true`)
+     const q = parts.length ? `?${parts.join('&')}` : ''
+     const res = await fetch(`${API_URL}contents/${q}`, {
+       headers: {
+         'Content-Type': 'application/json',
+         ...(typeof auth.getAuthHeader === 'function' ? auth.getAuthHeader() : {})
+       }
+     })
+     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`)
+     const data = await res.json()
+ 
+     posts.value = Array.isArray(data) ? data : (data.results ?? [])
+   } catch (err) {
+     error.value = err?.message || String(err)
+     posts.value = []
+   } finally {
+     loading.value = false
+   }
+ }
+ 
+onMounted(() => fetchPosts('', ordering.value, myContent.value))
 
 const searchTerm = ref('')
 let searchTimer = null
 watch(searchTerm, (val) => {
   if (searchTimer) clearTimeout(searchTimer)
   searchTimer = setTimeout(() => {
-    fetchPosts(val.trim())
+    fetchPosts(val.trim(), ordering.value, myContent.value)
     searchTimer = null
   }, 300)
 })
 
 const clearSearch = () => {
   searchTerm.value = ''
-  fetchPosts('')
+  fetchPosts('', ordering.value, myContent.value)
 }
 
-const logout = () => {
-  auth.logout()
-  navigateTo('/login')
-}
+watch(ordering, (val) => { fetchPosts(searchTerm.value.trim(), val, myContent.value) })
+watch(myContent, (val) => { fetchPosts(searchTerm.value.trim(), ordering.value, val) })
+
 
 const formatDate = (iso) => {
   if (!iso) return ''
@@ -185,12 +211,12 @@ const editPost = (id) => {
 
 const canEdit = ((author_id) => {
   if (!author_id) return false
-  if (auth.user.id == author_id) return true
+  if (auth.user && (auth.user.id == author_id || auth.user.groups.includes('admin'))) return true
 })
 
 const canDelete = ((author_id) => {
   if (!author_id) return false
-  if (auth.user && auth.user.id == author_id) return true
+  if (auth.user && (auth.user.id == author_id || auth.user.groups.includes('admin'))) return true
 })
 
 

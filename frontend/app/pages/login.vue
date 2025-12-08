@@ -1,27 +1,32 @@
 <template>
-  <div class="p-8 max-w-md mx-auto">
-    <h1 class="text-2xl mb-4">Login</h1>
+  <div class="login-container">
+    <div class="">
 
-    <form @submit.prevent="submit">
-      <input
-        v-model="username"
-        placeholder="Username"
-        class="border p-2 w-full mb-3"
-      />
-      <input
-        v-model="password"
-        type="password"
-        placeholder="Password"
-        class="border p-2 w-full mb-3"
-      />
+      <h1 class="">Bem vindo</h1>
 
-      <button class="bg-blue-600 text-white px-4 py-2 rounded">
-        Login
-      </button>
+      <form @submit.prevent="submit">
+        <input
+          v-model="username"
+          placeholder="Usuário"
+          class=""
+        />
+        <input
+          v-model="password"
+          type="password"
+          placeholder="Senha"
+          class=""
+        />
 
-      <p v-if="error" class="text-red-500 mt-3">{{ error }}</p>
-    </form>
+        <button class="">
+          Login
+        </button>
+
+        <p v-if="error" class="">{{ error }}</p>
+      </form>
+        
+    </div>
   </div>
+
 </template>
 
 <script setup>
@@ -43,3 +48,23 @@ const submit = async () => {
   error.value = "Invalid username or password"
 }
 </script>
+
+<style scoped>
+ body {
+    min-height: 100vh; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f7f6;
+} 
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+  height: 100vh;
+  background-color: #f5f5f5;
+}
+</style>

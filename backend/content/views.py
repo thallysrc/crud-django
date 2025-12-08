@@ -22,8 +22,6 @@ class ContentViewSet(ModelViewSet):
     permission_classes = (ContentPermission,)
     filter_backends = [SearchFilter]
     search_fields = ['title', 'description']
-    ordering_fields = ['created_at']
-    ordering = ['-created_at']
     pagination_class = ContentPagination
 
     def get_queryset(self):
@@ -33,6 +31,10 @@ class ContentViewSet(ModelViewSet):
 
         if my_content == 'true' and self.request.user.is_authenticated:
             queryset = queryset.filter(author=self.request.user)
+
+        ordering = self.request.query_params.get('ordering')
+        if ordering:
+            queryset = queryset.order_by(ordering)
 
         return queryset
 

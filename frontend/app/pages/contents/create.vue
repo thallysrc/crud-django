@@ -4,27 +4,27 @@
   <div class="container">
     <div class="row">
       <div class="col-6 offset-3">
-        <h3>{{ isEdit ? 'Edit Post' : 'Create Post' }}</h3>
+        <h3>{{ isEdit ? 'Editar conteúdo' : 'Criar conteúdo' }}</h3>
 
-        <div v-if="loading">Loading...</div>
+        <div v-if="loading" class="loading">Carregando...</div>
         <div v-else>
           <div class="mb-3">
-            <label class="form-label">Title</label>
+            <label class="form-label">Titulo</label>
             <input v-model="title" class="form-control" />
           </div>
 
           <div class="mb-3">
-            <label class="form-label">Description</label>
+            <label class="form-label">Descrição</label>
             <textarea v-model="description" class="form-control" rows="6"></textarea>
           </div>
 
-          <div v-if="error" class="alert alert-danger">{{ error }}</div>
+          <div v-if="error" class="alert-danger">{{ error }}</div>
 
-          <div class="d-flex gap-2">
+          <div class="d-flex-gap-2">
             <button class="btn btn-primary" @click="save" :disabled="saving">
-              {{ saving ? 'Saving...' : (isEdit ? 'Update' : 'Create') }}
+              {{ saving ? 'Salvando...' : (isEdit ? 'Atualizar' : 'Criar') }}
             </button>
-            <button class="btn btn-secondary" @click="cancel" :disabled="saving">Cancel</button>
+            <button class="btn btn-secondary" @click="cancel" :disabled="saving">Cancelar</button>
           </div>
         </div>
       </div>
@@ -95,7 +95,6 @@ const save = async () => {
       const txt = await res.text().catch(() => null)
       throw new Error(txt || `${res.status} ${res.statusText}`)
     }
-    // after create/update navigate back to index (adjust if you have a detail page)
     navigateTo('/')
   } catch (err) {
     error.value = err?.message || String(err)
@@ -108,8 +107,3 @@ const cancel = () => {
   navigateTo('/')
 }
 </script>
-
-<style scoped>
-/* minimal styling; adapt to your app's styles */
-.container { margin-top: 24px; }
-</style>

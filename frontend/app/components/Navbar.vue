@@ -7,7 +7,7 @@
 
       <div class="nav-links">
         <NuxtLink to="/favoritos" class="nav-link">Favoritos</NuxtLink>
-        <NuxtLink v-if="canCreate" to="/create" class="nav-link">Criar</NuxtLink>
+        <NuxtLink v-if="canCreate" to="/contents/create" class="nav-link">Criar</NuxtLink>
       </div>
 
       <div class="auth-area">

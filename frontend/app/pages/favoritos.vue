@@ -1,46 +1,50 @@
 <template>
   <Navbar />
 
-  <main class="posts-container container">
-    <h1 style="margin:16px 0; color:#fff;">Favoritos / Posts</h1>
+  <main class="container">
+    <div class="row">
+      <div class="col-6 offset-3">
+        <h1 style="margin:16px 0; color:#fff;">Favoritos / Posts</h1>
 
-    <div v-if="loading" class="post-card">
-      Carregando posts...
-    </div>
+        <div v-if="loading" class="post-card">
+          Carregando posts...
+        </div>
 
-    <div v-else-if="error" class="post-card">
-      Erro ao carregar posts: {{ error }}
-    </div>
+        <div v-else-if="error" class="post-card">
+          Erro ao carregar posts: {{ error }}
+        </div>
+        <div v-else>
+          <div v-if="posts.length === 0" class="post-card">
+            Nenhum post encontrado.
+          </div>
 
-    <div v-else>
-      <div v-if="posts.length === 0" class="post-card">
-        Nenhum post encontrado.
-      </div>
+          <div v-for="post in posts" :key="post.id" class="post-card">
+            <div class="post-header">
+              <div>
+                <div class="post-title">{{ post.title }}</div>
+                <div class="post-meta">ID: {{ post.id }} • {{ formatDate(post.created_at) }}</div>
+              </div>
+            </div>
 
-      <div v-for="post in posts" :key="post.id" class="post-card">
-        <div class="post-header">
-          <div>
-            <div class="post-title">{{ post.title }}</div>
-            <div class="post-meta">ID: {{ post.id }} • {{ formatDate(post.created_at) }}</div>
+            <div class="post-content">{{ post.description }}</div>
+
+            <!-- Unfavorite button (visible only to logged users) -->
+            <div class="mt-2">
+              <button
+                v-if="isLoggedIn"
+                class="btn btn-sm btn-outline-danger"
+                :disabled="unfavoritingIds.includes(post.id)"
+                @click="unfavoritePost(post.id)"
+              >
+                <span v-if="unfavoritingIds.includes(post.id)">Removing...</span>
+                <span v-else>Remove favorite</span>
+              </button>
+            </div>
           </div>
         </div>
-
-        <div class="post-content">{{ post.description }}</div>
-
-        <!-- Unfavorite button (visible only to logged users) -->
-        <div class="mt-2">
-          <button
-            v-if="isLoggedIn"
-            class="btn btn-sm btn-outline-danger"
-            :disabled="unfavoritingIds.includes(post.id)"
-            @click="unfavoritePost(post.id)"
-          >
-            <span v-if="unfavoritingIds.includes(post.id)">Removing...</span>
-            <span v-else>Remove favorite</span>
-          </button>
-        </div>
       </div>
     </div>
+
   </main>
 </template>
 
